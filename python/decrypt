@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+
+import sys
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+
+
+privatekeyfilename = sys.argv[1]
+messagefilename = sys.argv[2]
+passphrase = sys.argv[3]
+
+
+privatekeyfile = open(privatekeyfilename, 'rb')
+privatekey = serialization.load_pem_private_key(privatekeyfile.read(), passphrase.encode())
+
+messagefile = open(messagefilename, 'rb')
+message = messagefile.read()
+
+
+decryptedmessage = privatekey.decrypt(
+    message,
+    padding.OAEP(
+        mgf = padding.MGF1(algorithm = hashes.SHA256()),
+        algorithm = hashes.SHA256(),
+        label = None
+    )
+)
+
+decryptedfile = open('{}.dec'.format(messagefilename), 'wb')
+decryptedfile.write(decryptedmessage)
+
+
+privatekeyfile.close()
+messagefile.close()
+decryptedfile.close()

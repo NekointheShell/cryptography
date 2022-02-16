@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+
+import sys
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
+
+
+passphrase = sys.argv[1]
+
+
+privatekey = rsa.generate_private_key(
+    public_exponent = 65537,
+    key_size = 2048
+)
+
+privatekeypem = privatekey.private_bytes(
+    serialization.Encoding.PEM,
+    serialization.PrivateFormat.PKCS8,
+    serialization.BestAvailableEncryption(bytes(passphrase, 'utf-8'))
+)
+
+
+publickey = privatekey.public_key()
+
+publickeypem = publickey.public_bytes(
+    serialization.Encoding.PEM,
+    serialization.PublicFormat.SubjectPublicKeyInfo
+)
+
+
+privatekeyfile = open('../keys/privatekey.pem', 'w')
+privatekeyfile.write(privatekeypem.decode('utf-8'))
+privatekeyfile.close()
+
+
+publickeyfile = open('../keys/publickey.pem', 'w')
+publickeyfile.write(publickeypem.decode('utf-8'))
+publickeyfile.close()
